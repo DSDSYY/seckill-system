@@ -1,6 +1,6 @@
 # 高并发商品秒杀系统（后端 + 微信小程序）
 
-> 校招简历项目 · Spring Boot 3.3.5 / MySQL 8 / Redis / RabbitMQ / MyBatis-Plus / JWT
+> Spring Boot 3.3.5 / MySQL 8 / Redis / RabbitMQ / MyBatis-Plus / JWT
 > 覆盖"登录 → 活动 → 抢购 → 异步下单 → 超时取消"完整链路，已与微信小程序联调跑通。
 
 ## 一、项目简介
