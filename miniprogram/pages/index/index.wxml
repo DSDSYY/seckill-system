@@ -1,0 +1,53 @@
+<view class="container">
+  <!-- 接口地址 -->
+  <view class="card addr-card">
+    <text class="label">接口地址</text>
+    <text class="value addr">{{baseUrl}}</text>
+    <text class="addr-hint">本地调试用 127.0.0.1；真机预览请改成电脑局域网 IP（如 http://192.168.x.x:8081）</text>
+  </view>
+
+  <!-- 登录态卡片 -->
+  <view class="card">
+    <view class="card-row">
+      <text class="label">登录态</text>
+      <text class="value">{{userId ? ('userId: ' + userId) : '未登录'}}</text>
+      <button class="mini-btn" size="mini" bindtap="autoLogin">重新登录</button>
+    </view>
+  </view>
+
+  <!-- 抢购卡片 -->
+  <view class="card">
+    <view class="field">
+      <text class="label">活动ID</text>
+      <input class="input" type="number" value="{{activityId}}" bindinput="onActivityIdInput" placeholder="输入秒杀活动ID" />
+    </view>
+
+    <view class="card-row">
+      <button class="mini-btn" size="mini" bindtap="queryStock" disabled="{{loading}}">查询库存</button>
+      <text class="value stock">{{stockText}}</text>
+    </view>
+
+    <button class="seckill-btn" bindtap="onSeckill" disabled="{{loading || !userId}}">
+      {{loading ? '处理中...' : '立即抢购'}}
+    </button>
+    <text wx:if="{{!userId}}" class="hint">请先登录后再抢购</text>
+  </view>
+
+  <!-- 返回结果 -->
+  <view class="card" wx:if="{{result}}">
+    <text class="title">返回结果</text>
+    <view class="line"><text class="label">code</text><text class="value">{{result.code}}</text></view>
+    <view class="line"><text class="label">message</text><text class="value">{{result.message}}</text></view>
+    <view class="line" wx:if="{{result.data}}"><text class="label">data</text><text class="value">{{result.data}}</text></view>
+    <view class="line debug" wx:if="{{debugText}}">
+      <text class="label">原始信息</text>
+      <text class="value debug-text" user-select>{{debugText}}</text>
+    </view>
+    <button class="mini-btn" size="mini" bindtap="copyDebug" wx:if="{{debugText}}">复制诊断信息</button>
+  </view>
+
+  <view class="tips">
+    提示：连续快速点击会触发后端限流（429）；同一用户重复抢购返回 1006。
+    若登录失败，请先按 README 排查：后端是否启动、地址是否正确、"不校验合法域名"是否勾选。
+  </view>
+</view>

@@ -1,0 +1,84 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: seckill-backend
+
+  # ---------------- 数据源 ----------------
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/seckill?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: seckill
+    # 本地演示默认值；生产请用环境变量注入：DB_USERNAME / DB_PASSWORD
+    password: ${DB_PASSWORD:seckill123}
+
+  # ---------------- Redis ----------------
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:           # 本地无密码则留空
+      database: 0
+      lettuce:
+        pool:
+          max-active: 32
+          max-idle: 16
+          min-idle: 4
+          max-wait: 3s
+
+  # ---------------- RabbitMQ ----------------
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 1
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000ms
+          multiplier: 2.0
+          max-interval: 10000ms
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+# ---------------- MyBatis-Plus ----------------
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# ---------------- 业务自定义配置 ----------------
+seckill:
+  snowflake:
+    worker-id: 1
+    datacenter-id: 1
+  order:
+    pay-timeout-minutes: 15
+  jwt:
+    # 生产环境务必换成随机长密钥(>=32字节)，并用环境变量注入
+    secret: ${JWT_SECRET:seckill-demo-jwt-secret-key-please-change-0123456789}
+    expire-hours: 24
+  rate-limit:
+    capacity: 5            # 令牌桶容量（突发上限）
+    refill-per-second: 5   # 每秒补充令牌数 = 稳态 QPS 上限
+  wechat:
+    mock-enabled: true     # true=本地模拟登录(免真微信); false=走 code2session 真实登录
+
+logging:
+  level:
+    com.example.seckill: debug

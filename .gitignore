@@ -1,0 +1,27 @@
+# build
+target/
+*.class
+*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# runtime / logs
+*.log
+logs/
+erl_crash.dump
+
+# miniprogram local private config
+miniprogram/project.private.config.json
+miniprogram/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# local secrets
+.env
+application-local.yml

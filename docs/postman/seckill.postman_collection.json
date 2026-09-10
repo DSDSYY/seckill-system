@@ -1,0 +1,122 @@
+{
+  "info": {
+    "_postman_id": "9f1c2e6a-7b3d-4a5e-8f0c-1d2e3f4a5b6c",
+    "name": "秒杀系统后端接口（阶段四收口）",
+    "description": "微信小程序秒杀后端调试集合。\n\n使用步骤：\n1. 启动后端（MySQL + Redis + RabbitMQ）；\n2. 先调「01-登录获取Token」，脚本会自动把 token 写入集合变量；\n3. 依次调「03-预热库存」→「04-查询剩余库存」→「02-抢购下单」；\n4. 连续快速调用 02 超过 5 次/秒会返回 code=429（限流）；同一用户重复抢购返回 code=1006。\n\n业务错误码：1001 活动不存在 / 1002 未开始 / 1003 已结束 / 1004 售罄 / 1005 繁忙 / 1006 重复下单 / 429 限流 / 401 未登录",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01-登录获取Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"demo-code-10001\",\n  \"nickname\": \"测试用户\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "auth", "login" ]
+        },
+        "description": "模拟微信登录（mock 模式）。返回 data.userId + data.token，脚本自动保存 token 到集合变量。"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('登录成功且返回 token', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json.code).to.eql(200);",
+              "  if (json.code === 200) {",
+              "    pm.collectionVariables.set('token', json.data.token);",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02-抢购下单 POST /api/seckill/do",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"activityId\": 1\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/seckill/do",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "seckill", "do" ]
+        },
+        "description": "小程序抢购入口（单用户限流 5 次/秒）。\n成功：code=200，data=临时订单号；\n失败：1004 售罄 / 1006 重复下单 / 429 限流 / 401 未登录。\n\n可对同一请求做「Runner/压测」验证限流与一人一单。"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var json = pm.response.json();",
+              "if (json.code === 200) {",
+              "  pm.test('抢购成功，返回订单号', function () {",
+              "    pm.expect(json.data).to.be.a('string');",
+              "  });",
+              "  pm.collectionVariables.set('orderNo', json.data);",
+              "} else {",
+              "  console.log('业务失败 code=' + json.code + ', msg=' + json.message);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03-预热秒杀库存（开发）",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/seckill/stock/init/1",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "seckill", "stock", "init", "1" ]
+        },
+        "description": "把活动 1 的 DB 库存预热到 Redis（活动开始前调用）。"
+      }
+    },
+    {
+      "name": "04-查询Redis剩余库存（开发）",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/seckill/stock/1",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "seckill", "stock", "1" ]
+        },
+        "description": "查看活动 1 在 Redis 中的剩余库存，用于验证不超卖。"
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "orderNo", "value": "", "type": "string" }
+  ]
+}
