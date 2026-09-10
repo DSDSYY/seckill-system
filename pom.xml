@@ -15,7 +15,7 @@
     <artifactId>seckill-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>seckill-backend</name>
-    <description>高并发秒杀系统后端（校招简历项目）</description>
+    <description>高并发秒杀系统后端：Spring Boot + MySQL + Redis + RabbitMQ + 微信小程序</description>
 
     <properties>
         <java.version>17</java.version>
