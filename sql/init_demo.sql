@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `seckill_order` (
 -- ---------------- 4. 演示数据（可重复执行）----------------
 -- 商品 1 + 活动 1：从现在起倒推 1 小时开始、2 小时后结束（保证活动处于"进行中"），库存 5
 INSERT IGNORE INTO `product` (id, product_name, subtitle, original_price, status)
-VALUES (1, '秒杀测试手机', '校招简历项目演示商品', 6999.00, 1);
+VALUES (1, '秒杀测试手机', '秒杀功能演示商品', 6999.00, 1);
 
 INSERT IGNORE INTO `seckill_activity`
     (id, product_id, seckill_price, seckill_stock, total_stock, start_time, end_time, status)
